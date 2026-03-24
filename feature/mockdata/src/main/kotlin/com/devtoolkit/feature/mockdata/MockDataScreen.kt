@@ -139,8 +139,8 @@ private fun generatePeople(count: Int, locale: String, csvOutput: Boolean): Stri
         mapOf(
             "name" to name,
             "email" to "${firstName.lowercase()}.${lastName.lowercase()}@example.dev",
-            "address" to "${random.nextInt(1, 220)} ${pick(streetNames)} St, $city",
-            "phone" to "$phonePrefix ${random.nextInt(100_000, 999_999)}",
+            "address" to "${randomInt(1, 220)} ${pick(streetNames)} St, $city",
+            "phone" to "$phonePrefix ${randomInt(100_000, 999_999)}",
         )
     }
     return if (csvOutput) {
@@ -184,15 +184,20 @@ private fun jsonValue(type: String): String = when (type.lowercase()) {
     "uuid" -> "\"${UUID.randomUUID()}\""
     "name" -> "\"${pick(firstNames)} ${pick(lastNames)}\""
     "email" -> "\"user${random.nextInt(10_000)}@example.dev\""
-    "address" -> "\"${random.nextInt(1, 220)} ${pick(streetNames)} Street\""
-    "phone" -> "\"+1 ${random.nextInt(100_000, 999_999)}\""
-    "int", "number" -> random.nextInt(18, 90).toString()
+    "address" -> "\"${randomInt(1, 220)} ${pick(streetNames)} Street\""
+    "phone" -> "\"+1 ${randomInt(100_000, 999_999)}\""
+    "int", "number" -> randomInt(18, 90).toString()
     "bool", "boolean" -> (random.nextInt(2) == 0).toString()
     "lorem", "string" -> "\"${pick(loremSentences)}\""
     else -> "\"$type\""
 }
 
 private fun <T> pick(items: List<T>): T = items[random.nextInt(items.size)]
+
+private fun randomInt(startInclusive: Int, endExclusive: Int): Int {
+    require(endExclusive > startInclusive) { "endExclusive must be greater than startInclusive" }
+    return startInclusive + random.nextInt(endExclusive - startInclusive)
+}
 
 private val firstNames = listOf("Alex", "Jordan", "Riley", "Morgan", "Taylor", "Casey")
 private val lastNames = listOf("Patel", "Nguyen", "Smith", "Jones", "Brown", "Williams")

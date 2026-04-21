@@ -33,6 +33,10 @@ INDEX_HTML = """<!doctype html>
       color: var(--muted);
     }
 
+    .footer-adsense.is-hidden {
+      display: none;
+    }
+
     .footer-adsense__unit {
       display: block;
       width: 100%;
@@ -234,12 +238,48 @@ INDEX_HTML = """<!doctype html>
             return;
           }
 
+          const showAd = function () {
+            wrapper.hidden = false;
+            wrapper.classList.remove("is-hidden");
+          };
+
+          const hideAd = function () {
+            wrapper.hidden = true;
+            wrapper.classList.add("is-hidden");
+          };
+
+          const syncVisibility = function () {
+            const status = unit.getAttribute("data-ad-status");
+            if (status === "filled") {
+              showAd();
+              return;
+            }
+
+            if (status === "unfilled") {
+              hideAd();
+            }
+          };
+
           unit.setAttribute("data-ad-client", config.client);
           unit.setAttribute("data-ad-slot", config.slot);
-          wrapper.hidden = false;
+
+          const observer = new MutationObserver(syncVisibility);
+          observer.observe(unit, {
+            attributes: true,
+            attributeFilter: ["data-ad-status"],
+          });
+
+          showAd();
           try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
+            window.setTimeout(syncVisibility, 1500);
+            window.setTimeout(function () {
+              if (!unit.getAttribute("data-ad-status")) {
+                hideAd();
+              }
+            }, 4000);
           } catch (error) {
+            hideAd();
             console.error("Footer AdSense failed to render", error);
           }
         })();

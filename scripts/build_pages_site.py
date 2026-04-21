@@ -3,6 +3,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_POLICY = ROOT / "docs" / "release" / "privacy-policy.html"
+SOURCE_ADSENSE_CONFIG = ROOT / "docs" / "release" / "adsense-config.js"
+SOURCE_ADS_TXT = ROOT / "docs" / "release" / "ads.txt"
 SITE_DIR = ROOT / "site"
 PRIVACY_DIR = SITE_DIR / "privacy-policy"
 
@@ -13,6 +15,53 @@ INDEX_HTML = """<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DevToolkit</title>
+  <style data-footer-adsense-style>
+    .footer-adsense {
+      margin-top: 24px;
+      padding-top: 18px;
+      display: grid;
+      gap: 12px;
+      width: 100%;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-adsense__label {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer-adsense__unit {
+      display: block;
+      width: 100%;
+      min-height: 90px;
+    }
+  </style>
+  <script src="./adsense-config.js"></script>
+  <script>
+    (function () {
+      const config = window.__FOOTER_ADSENSE__;
+      if (
+        !config ||
+        !config.client ||
+        !config.slot ||
+        document.querySelector("script[data-footer-adsense-loader]")
+      ) {
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.async = true;
+      script.src =
+        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" +
+        encodeURIComponent(config.client);
+      script.crossOrigin = "anonymous";
+      script.dataset.footerAdsenseLoader = "true";
+      document.head.appendChild(script);
+    })();
+  </script>
   <style>
     :root {
       color-scheme: light;
@@ -163,6 +212,38 @@ INDEX_HTML = """<!doctype html>
         </article>
       </div>
       <p class="status">Expected privacy policy URL after GitHub Pages is enabled: https://mysticalg.github.io/dev-toolkit/privacy-policy/</p>
+      <div class="footer-adsense" data-footer-adsense hidden>
+        <p class="footer-adsense__label">Advertisement</p>
+        <ins
+          class="adsbygoogle footer-adsense__unit"
+          style="display:block"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        ></ins>
+      </div>
+      <script>
+        (function () {
+          const wrapper = document.currentScript.previousElementSibling;
+          const config = window.__FOOTER_ADSENSE__;
+          if (!wrapper || !config || !config.client || !config.slot) {
+            return;
+          }
+
+          const unit = wrapper.querySelector(".adsbygoogle");
+          if (!unit) {
+            return;
+          }
+
+          unit.setAttribute("data-ad-client", config.client);
+          unit.setAttribute("data-ad-slot", config.slot);
+          wrapper.hidden = false;
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (error) {
+            console.error("Footer AdSense failed to render", error);
+          }
+        })();
+      </script>
     </section>
   </main>
 </body>
@@ -178,6 +259,10 @@ def main() -> None:
     SITE_DIR.joinpath(".nojekyll").write_text("", encoding="utf-8")
     SITE_DIR.joinpath("404.html").write_text(INDEX_HTML, encoding="utf-8")
     PRIVACY_DIR.joinpath("index.html").write_text(SOURCE_POLICY.read_text(encoding="utf-8"), encoding="utf-8")
+    SITE_DIR.joinpath("adsense-config.js").write_text(SOURCE_ADSENSE_CONFIG.read_text(encoding="utf-8"), encoding="utf-8")
+    PRIVACY_DIR.joinpath("adsense-config.js").write_text(SOURCE_ADSENSE_CONFIG.read_text(encoding="utf-8"), encoding="utf-8")
+    SITE_DIR.joinpath("ads.txt").write_text(SOURCE_ADS_TXT.read_text(encoding="utf-8"), encoding="utf-8")
+    PRIVACY_DIR.joinpath("ads.txt").write_text(SOURCE_ADS_TXT.read_text(encoding="utf-8"), encoding="utf-8")
 
 
 if __name__ == "__main__":
